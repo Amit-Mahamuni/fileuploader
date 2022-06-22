@@ -1,6 +1,5 @@
-import { Container, Row, Col, Button, Modal, Card, ProgressBar } from "react-bootstrap";
 import axios from "axios"
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 function App() {
 
@@ -48,15 +47,19 @@ function App() {
 
   }
 
-  function selectFile(e) {
-    console.log(e.target.files)
-    setFiles(Object.values(e.target.files))
-    let temp = {}
-    Object.values(e.target.files).map(x => {
+  function selectFile(file) {
+    setFiles(files.concat(Object.values(file)))
+    let temp = pro
+    Object.values(file).map(x => {
       temp[x.name] = { progress: 0, link: null, preview: URL.createObjectURL(x) }
     })
     setpro(temp)
   }
+
+  function deleteFile() {
+
+  }
+
   function handleDragIn(e) {
     e.preventDefault()
     e.stopPropagation()
@@ -64,94 +67,110 @@ function App() {
       setDrag(true)
     }
   }
+
   function handleDrag(e) {
     e.preventDefault()
     e.stopPropagation()
-
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setDrag(true)
+    }
   }
+
   function handleDragOut(e) {
     e.preventDefault()
     e.stopPropagation()
     setDrag(false)
   }
+
   function handleDrop(e) {
     console.log(e)
     e.preventDefault()
     e.stopPropagation()
     setDrag(false)
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      let temp = files;
-      temp.push(Object.values(e.dataTransfer.files))
-      setFiles(temp)
-      console.log(e.dataTransfer.files)
+      // console.log(e.dataTransfer.files)
+      selectFile(e.dataTransfer.files)
       e.dataTransfer.clearData()
     }
   }
 
   return (
-    <Container className="fileUploaderSec">
-      <Modal show={true} dialogClassName="modal-90w" centered={true} size="xl">
-        <Modal.Header closeButton>
-          <Modal.Title>Upload Files</Modal.Title>
-        </Modal.Header>
-        <form onSubmit={(e) => sendData(e)}>
-          <Modal.Body>
-            <Row>
-              <Col md={2}></Col>
-              <Col md={6} className="d-flex justify-content-center align-items-center">
-                <div className="text-center w-100 h-100 p-4"
-                  style={{ "border": drag ? "3px dashed #000" : null }}
-                  onDragEnter={(e) => handleDragIn(e)}
-                  onDragLeave={(e) => handleDragOut(e)}
-                  onDrop={(e) => handleDrop(e)}
-                  onDragOver={(e) => handleDrag(e)}>
-                  <h4>Drop your file to upload</h4>
-                  <p>or</p>
-                  <label htmlFor="docFile" className="btn btn-primary">Choose your files</label>
-                  <input onChange={(e) => selectFile(e)} hidden
-                    className="form-control custom-file-input" type="file" name="docFile" id="docFile" multiple />
-                </div>
-              </Col>
-              <Col md={4}>
-                <span>Selected File ({Object.keys(pro).length})</span>
-                {
-                  Object.keys(pro).length ?
-                    Object.entries(pro).map((x, i) => {
-                      return (
-                        <div className="card mb-3" key={"fileCard_" + i}>
-                          <div className="row g-0">
-                            <div className="col-md-4">
-                              <img src={x[1].preview} className="img-fluid h-100" />
-                            </div>
-                            <div className="col-md-8">
-                              <div className="card-body">
-                                <a href={x[1].link ? "http://localhost:3001/" + x[1].link : "#"} target="_blank" className="card-text filecardTitle">
-                                  {x[0]}
-                                </a>
-                                <div className="progress" style={{ "height": "2px" }}>
-                                  <div className="progress-bar" role="progressbar" style={{ "width": x[1].progress + "%" }} aria-valuenow={x[1].progress} aria-valuemin="0" aria-valuemax="100"></div>
+    <div className="container fileUploaderSec">
+
+      <div className="modal show" tabIndex="-1" id="fileuploadModal">
+        <div className="modal-dialog modal-dialog-centered modal-xl">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Upload Files</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form onSubmit={(e) => sendData(e)}>
+              <div className="modal-body">
+                <div className="row">
+                  <div className="col-md-2"></div>
+                  <div className="col-md-6 d-flex justify-content-center align-items-center">
+                    <div className="text-center w-100 h-100 p-4"
+                      style={{ "border": drag ? "3px dashed #000" : null }}
+                      onDragEnter={(e) => handleDragIn(e)}
+                      onDragLeave={(e) => handleDragOut(e)}
+                      onDrop={(e) => handleDrop(e)}
+                      onDragOver={(e) => handleDrag(e)}>
+                      <h4>Drop your file to upload</h4>
+                      <p>or</p>
+                      <label htmlFor="docFile" className="btn btn-primary">Choose your files</label>
+                      <input onChange={(e) => selectFile(e.target.files)} hidden
+                        className="form-control custom-file-input" type="file" name="docFile" id="docFile" multiple />
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <span>Selected File ({Object.keys(pro).length})</span>
+                    {
+                      Object.keys(pro).length ?
+                        Object.entries(pro).map((x, i) => {
+                          return (
+                            <div className="card mb-3" key={"fileCard_" + i}>
+                              <div className="row g-0">
+                                <div className="col-md-4">
+                                  <img src={x[1].preview} alt="preview_img" className="img-fluid h-100" />
                                 </div>
-                                <p className="card-text"><small className="text-muted">{x[1].progress + "% Done"}</small></p>
+                                <div className="col-md-8">
+                                  <div className="card-body">
+                                    <div className="d-flex justify-content-between">
+                                      <a href={x[1].link ? "http://localhost:3001/" + x[1].link : "#"} target="_blank" rel="noreferrer" className="card-text filecardTitle">
+                                        {x[0]}
+                                      </a>
+                                      <button className="btn btn-sm py-0 px-1 ms-1"
+                                        onClick={() => deleteFile()}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                          <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                    <div className="progress" style={{ "height": "2px" }}>
+                                      <div className="progress-bar" role="progressbar" style={{ "width": x[1].progress + "%" }} aria-valuenow={x[1].progress} aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <p className="card-text"><small className="text-muted">{x[1].progress + "% Done"}</small></p>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                      )
-                    })
-                    : null
-                }
+                          )
+                        })
+                        : null
+                    }
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="reset" className="btn btn-light">Cancle</button>
+                <button type="submit" className="btn btn-primary ms-2">Add</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
 
-              </Col>
-            </Row>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button type="reset" variant="light">Cancle</Button>
-            <Button type="submit" variant="primary" className="ms-2">Done</Button>
-          </Modal.Footer>
-        </form>
-      </Modal>
-
-    </Container>
+    </div>
   )
 
 }

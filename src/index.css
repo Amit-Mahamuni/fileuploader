@@ -28,3 +28,7 @@ code {
   -webkit-line-clamp: 1 !important;
   -webkit-box-orient: vertical !important;
 }
+
+.modal{
+  display: block !important;
+}
