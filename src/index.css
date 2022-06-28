@@ -12,13 +12,6 @@ code {
     monospace;
 }
 
-.fileUploaderSec{
-  height: 90vh !important;
-  position: fixed;
-  top:50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-}
 
 .filecardTitle{
   text-decoration: none;
@@ -27,8 +20,4 @@ code {
   display: -webkit-box !important;
   -webkit-line-clamp: 1 !important;
   -webkit-box-orient: vertical !important;
-}
-
-.modal{
-  display: block !important;
 }

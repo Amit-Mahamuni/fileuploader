@@ -4,8 +4,8 @@ import FileUploader from "./FileUpload";
 const BASE_URL = "http://localhost:3001/"
 function App() {
 
-  const [uploadedFiles, setuploadedFiles] = useState([])
   const [modalShow, setModalShow] = useState(false)
+  const [uploadedFiles, setuploadedFiles] = useState({})
 
   return (
     <>
@@ -14,12 +14,16 @@ function App() {
           onClick={() => setModalShow(!modalShow)}>Add File</button>
         <div className="list-group">
           {
-            uploadedFiles.map((x, i) =>
-              <a key={"file_uploaded_" + i} href={BASE_URL + x.link} className="list-group-item list-group-item-action" aria-current="true"
-                target="_blank" rel="noreferrer">
-                {x.name}
-              </a>
-            )
+            Object.values(uploadedFiles).map((x, i) => {
+              if (x.progress === 100 && x.link) {
+                return (
+                  <a key={"file_uploaded_" + i} href={BASE_URL + x.link} className="list-group-item list-group-item-action" aria-current="true"
+                    target="_blank" rel="noreferrer">
+                    {x.data.name}
+                  </a>
+                )
+              }
+            })
           }
         </div>
       </div>
