@@ -1,5 +1,6 @@
-import axios from "axios"
+import axios from "axios";
 import { useState } from "react";
+import { Modal } from "react-bootstrap";
 
 export default function FileUploader(props) {
     const [file, setFile] = useState({})
@@ -14,11 +15,15 @@ export default function FileUploader(props) {
 
     function sendData(e) {
         e.preventDefault()
+        let temp = []
         Object.entries(file).map((x, i) => {
+            temp.push({
+                name: x[0],
+                link: x[1].link
+            })
             if (x[1].progress != 100) {
                 const formData = new FormData();
                 formData.append("docFile", x[1].data);
-                //console.log(x[0])
                 axios.post("http://localhost:3001/", formData,
                     {
                         onUploadProgress: data => {
@@ -34,8 +39,8 @@ export default function FileUploader(props) {
                         }
                     }
                 ).then((res) => {
-                    //console.log(res)
                     setFile(pre => {
+
                         return {
                             ...pre,
                             [x[0]]: {
@@ -44,9 +49,19 @@ export default function FileUploader(props) {
                             }
                         }
                     })
+                    temp[temp.findIndex(y => y.name = x[0])].link = res.data.data[0]
                 })
             }
+
         })
+
+        // send uploaded file name & link to parent component
+        props.setuploadedFiles(pre => {
+            temp.concat(pre)
+            return temp
+        })
+
+
     }
 
     function selectFile(file) {
@@ -102,7 +117,11 @@ export default function FileUploader(props) {
 
     return (
         <div className="container fileUploaderSec">
-            <div className="modal show" tabIndex="-1" id="fileuploadModal">
+
+
+
+            <div className="modal"
+                tabIndex="-1" id="fileuploadModal">
                 <div className="modal-dialog modal-dialog-centered modal-xl">
                     <div className="modal-content">
                         <div className="modal-header">
