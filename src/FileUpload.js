@@ -2,6 +2,8 @@ import axios from "axios";
 import { useState } from "react";
 import { Modal } from "react-bootstrap";
 
+const BASE_URL = "http://localhost:3001/";
+
 export default function FileUploader(props) {
     const [drag, setDrag] = useState(false)
     const [fileOption, setFileOption] = useState({
@@ -12,13 +14,14 @@ export default function FileUploader(props) {
         disabled: props.disabled
     })
 
+    //send file|data to server and update state
     function sendData(e) {
         e.preventDefault()
         Object.entries(props.uploadedFiles).map((x, i) => {
             if (x[1].progress != 100) {
                 const formData = new FormData();
                 formData.append("docFile", x[1].data);
-                axios.post("http://localhost:3001/", formData,
+                axios.post(BASE_URL, formData,
                     {
                         onUploadProgress: data => {
                             props.setuploadedFiles(pre => {
@@ -42,18 +45,19 @@ export default function FileUploader(props) {
                                 link: res.data.data[0]
                             }
                         }
-                    })                   
+                    })
                 })
             }
 
         })
     }
 
+    //update state when file select
     function selectFile(file) {
         props.setuploadedFiles(prev => {
             let temp = { ...prev }
             Object.values(file).map(x => {
-                if (x.size <= fileOption.maxSize) {
+                if (x.size <= fileOption.maxSize && Object.keys(file).includes(x.name)) {
                     temp[x.name] = { progress: 0, link: null, preview: URL.createObjectURL(x), data: x }
                 }
             })
@@ -61,6 +65,7 @@ export default function FileUploader(props) {
         })
     }
 
+    //remove file from state
     function deleteFile(fname) {
         props.setuploadedFiles(pre => {
             let temp = { ...pre };
@@ -69,6 +74,7 @@ export default function FileUploader(props) {
         })
     }
 
+    //handle drap and drop functionality
     function handleDragDrop(e, i) {
         e.preventDefault()
         e.stopPropagation()

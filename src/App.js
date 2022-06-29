@@ -48,7 +48,6 @@ function App() {
         uploadedFiles={uploadedFiles}
       />
     </>
-
   )
 
 }
